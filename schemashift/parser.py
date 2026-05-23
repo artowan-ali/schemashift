@@ -29,6 +29,9 @@ def parse_schema(sql: str) -> Dict[str, Any]:
                 }
             }
         }
+
+    Raises:
+        ValueError: If no valid CREATE TABLE statements are found in *sql*.
     """
     schema: Dict[str, Any] = {}
     for match in CREATE_TABLE_RE.finditer(sql):
@@ -36,6 +39,10 @@ def parse_schema(sql: str) -> Dict[str, Any]:
         body = match.group(2)
         columns = _parse_columns(body)
         schema[table_name] = {"columns": columns}
+
+    if not schema:
+        raise ValueError("No valid CREATE TABLE statements found in the provided SQL.")
+
     return schema
 
 
