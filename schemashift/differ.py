@@ -61,30 +61,43 @@ def _diff_table(table: str, old: dict, new: dict, result: SchemaDiff) -> None:
         ))
 
     for col in set(old_cols) & set(new_cols):
-        old_def = old_cols[col]
-        new_def = new_cols[col]
-        if old_def.get("type") != new_def.get("type"):
-            result.add(SchemaChange(
-                change_type=ChangeType.COLUMN_TYPE_CHANGED,
-                table=table,
-                column=col,
-                old_value=old_def.get("type"),
-                new_value=new_def.get("type"),
-                description=f"Column '{col}' type changed from '{old_def.get('type')}' to '{new_def.get('type')}' in table '{table}'",
-            ))
-        if old_def.get("nullable") != new_def.get("nullable"):
-            result.add(SchemaChange(
-                change_type=ChangeType.COLUMN_NULLABLE_CHANGED,
-                table=table,
-                column=col,
-                old_value=str(old_def.get("nullable")),
-                new_value=str(new_def.get("nullable")),
-                description=f"Column '{col}' nullable changed from {old_def.get('nullable')} to {new_def.get('nullable')} in table '{table}'",
-            ))
+        _diff_column(table, col, old_cols[col], new_cols[col], result)
 
     old_indexes = set(old.get("indexes", []))
     new_indexes = set(new.get("indexes", []))
     for idx in old_indexes - new_indexes:
-        result.add(SchemaChange(change_type=ChangeType.INDEX_REMOVED, table=table, description=f"Index '{idx}' removed from table '{table}'"))
+        result.add(SchemaChange(
+            change_type=ChangeType.INDEX_REMOVED,
+            table=table,
+            description=f"Index '{idx}' removed from table '{table}'",
+        ))
     for idx in new_indexes - old_indexes:
-        result.add(SchemaChange(change_type=ChangeType.INDEX_ADDED, table=table, description=f"Index '{idx}' added to table '{table}'"))
+        result.add(SchemaChange(
+            change_type=ChangeType.INDEX_ADDED,
+            table=table,
+            description=f"Index '{idx}' added to table '{table}'",
+        ))
+
+
+def _diff_column(
+    table: str, col: str, old_def: dict, new_def: dict, result: SchemaDiff
+) -> None:
+    """Compare two column definitions and record any detected changes."""
+    if old_def.get("type") != new_def.get("type"):
+        result.add(SchemaChange(
+            change_type=ChangeType.COLUMN_TYPE_CHANGED,
+            table=table,
+            column=col,
+            old_value=old_def.get("type"),
+            new_value=new_def.get("type"),
+            description=f"Column '{col}' type changed from '{old_def.get('type')}' to '{new_def.get('type')}' in table '{table}'",
+        ))
+    if old_def.get("nullable") != new_def.get("nullable"):
+        result.add(SchemaChange(
+            change_type=ChangeType.COLUMN_NULLABLE_CHANGED,
+            table=table,
+            column=col,
+            old_value=str(old_def.get("nullable")),
+            new_value=str(new_def.get("nullable")),
+            description=f"Column '{col}' nullable changed from {old_def.get('nullable')} to {new_def.get('nullable')} in table '{table}'",
+        ))
