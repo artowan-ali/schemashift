@@ -1,0 +1,23 @@
+{
+  "ignore": [
+    {
+      "_comment": "Suppress all changes on the audit_log table",
+      "table": "audit_log"
+    },
+    {
+      "_comment": "Suppress non-breaking column additions on any table",
+      "change_type": "column_added"
+    },
+    {
+      "_comment": "Suppress type changes on the 'legacy_id' column across all tables",
+      "column": "legacy_id",
+      "change_type": "column_type_changed"
+    },
+    {
+      "_comment": "Suppress a specific table+column combination",
+      "table": "sessions",
+      "column": "expires_at",
+      "change_type": "column_removed"
+    }
+  ]
+}
